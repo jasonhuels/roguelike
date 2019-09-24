@@ -1,0 +1,11 @@
+/Users/Guest/Desktop/rogueLike/obj/Debug/netcoreapp2.2/RogueLike.csprojAssemblyReference.cache
+/Users/Guest/Desktop/rogueLike/obj/Debug/netcoreapp2.2/RogueLike.csproj.CoreCompileInputs.cache
+/Users/Guest/Desktop/rogueLike/obj/Debug/netcoreapp2.2/RogueLike.AssemblyInfoInputs.cache
+/Users/Guest/Desktop/rogueLike/obj/Debug/netcoreapp2.2/RogueLike.AssemblyInfo.cs
+/Users/Guest/Desktop/rogueLike/bin/Debug/netcoreapp2.2/RogueLike.deps.json
+/Users/Guest/Desktop/rogueLike/bin/Debug/netcoreapp2.2/RogueLike.runtimeconfig.json
+/Users/Guest/Desktop/rogueLike/bin/Debug/netcoreapp2.2/RogueLike.runtimeconfig.dev.json
+/Users/Guest/Desktop/rogueLike/bin/Debug/netcoreapp2.2/RogueLike.dll
+/Users/Guest/Desktop/rogueLike/bin/Debug/netcoreapp2.2/RogueLike.pdb
+/Users/Guest/Desktop/rogueLike/obj/Debug/netcoreapp2.2/RogueLike.dll
+/Users/Guest/Desktop/rogueLike/obj/Debug/netcoreapp2.2/RogueLike.pdb
