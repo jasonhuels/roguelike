@@ -11,7 +11,8 @@ class Program
     Map map = new Map();
     Player player = new Player(20);
     
-    map.DrawMap(player.GetPosition());  
+    map.DrawMap(player.GetPosition()); 
+    player.DrawHealth();
 
     ConsoleKeyInfo cki = Console.ReadKey(true);
    

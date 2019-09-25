@@ -8,17 +8,21 @@ namespace MapNS
         const char FLOOR = (char)9617;
         const char WALL = (char)9608;
         const char FOG = (char)9619;
-        const char SPIKEPIT = (char)5775;
+        const char EXIT = (char)9636;
+        const char SPIKEPIT = (char)5774;
+        const char ENEMY = (char)8621;
         private bool[,] _Fog;
         private char[,] _Map;
         private int[] playerPosition = {15,35};
-
-
+        private char KEY = (char)8613;
+        private char LastSquare = FLOOR;
+        private int _EnemyCount = 0;
         public Map()
         {
             int[] diggerStart = {15, 35};
             char[,] map = new char[30,71];
             bool[,] fog = new bool[30,71];
+            LastSquare = FLOOR;
             Console.Clear();
             for (int i=0; i<30; i++)
             {
@@ -32,9 +36,9 @@ namespace MapNS
             Digger(map, diggerStart, 1500);
             _Fog = fog;
             _Map = map;
-            CleanMap(7);
-            //CleanMap(8);
+            CleanMap(4);
             AddSpikePits();
+            PopulateMap();
         }
         public void DrawMap(int[] playerPosition) 
         {
@@ -47,32 +51,22 @@ namespace MapNS
             {
                 for(int j=-4; j<=4; j++)
                 {
-                    //relative to player position
                     if (Math.Abs(i) + Math.Abs(j) <= 4)
                     {
                         if((playerPosition[0]+ i >= 0 && playerPosition[0]+i < _Map.GetLength(0)) && (playerPosition[1]+j >= 0 && playerPosition[1]+j < _Map.GetLength(1)-1)) {
                         _Fog[playerPosition[0]+i, playerPosition[1]+j] = false;
                         }
                     }
-                    // if(playerPosition[0]+i > 0 && playerPosition[0]+i < _Map.GetLength(0)-1)
-                    // {
-                    //     _Fog[playerPosition[0]+i, playerPosition[1]] = false;
-                    // }
-                    
-                    //  if(playerPosition[1]+i > 0 && playerPosition[1]+i < _Map.GetLength(1)-1)
-                    // {
-                    //     _Fog[playerPosition[0], playerPosition[1]+i] = false;
-                    // }
                 }
             }
             for(int i=0; i<30; i++)
             {
                 for(int j=0; j< 71; j++)
                 {
-                    //Console.Write(map[i,j]);
                     if(_Fog[i,j])
                     {
-                        mapString += FOG;
+                        //mapString += FOG;
+                        mapString += _Map[i,j];         
                     } else{
                         mapString += _Map[i,j];
                     }
@@ -130,19 +124,27 @@ namespace MapNS
                         continue;
                     }
                     int neighbors = CountNeighbors(i,j);
-                    if(neighbors == 8)
+                    if(neighbors == 8 && _Map[i,j] != EXIT)
                     {
                         newMap[i,j] = SPIKEPIT;
-                    } else
+                    } else if(_Map[i,j] != EXIT)
                     {
                         newMap[i,j] = WALL;
+                    }else if(_Map[i,j] == EXIT)
+                    {
+                        newMap[i,j] = EXIT;
                     }
                 }
                 newMap[i,70] = '\n';
             }
-            for(int i=0; i<69; i++)
+            for(int i=0; i<=69; i++)
             {
+                newMap[0, i] = WALL;
                 newMap[29,i] = WALL;
+            }
+            for(int j=0; j<29; j++)
+            {
+                newMap[j, 0] = WALL;
             }
             newMap[29, 70] = '\n';
             _Map = newMap;
@@ -160,17 +162,20 @@ namespace MapNS
                         continue;
                     }
                     int neighbors = CountNeighbors(i,j);
-                    if(neighbors >=neighborLimit)
+                    if(neighbors >=neighborLimit && _Map[i,j] != EXIT)
                     {
                         newMap[i,j] = FLOOR;
-                    } else
+                    } else if(_Map[i,j] != EXIT)
                     {
                         newMap[i,j] = WALL;
+                    } else if(_Map[i,j] == EXIT)
+                    {
+                        newMap[i,j] = EXIT;
                     }
                 }
                 newMap[i,70] = '\n';
             }
-            for(int i=0; i<69; i++)
+            for(int i=0; i<=69; i++)
             {
                 newMap[29,i] = WALL;
             }
@@ -182,44 +187,95 @@ namespace MapNS
         {
              if(input == 'a') 
             {
-                _Map[playerPosition[0], playerPosition[1]] = FLOOR;
-                if(playerPosition[1]-1 >= 0 && _Map[playerPosition[0], playerPosition[1]-1] == FLOOR) 
+                char leftCheck = _Map[playerPosition[0], playerPosition[1]-1];
+                _Map[playerPosition[0], playerPosition[1]] = LastSquare;
+                if(playerPosition[1]-1 >= 0 && (leftCheck == FLOOR ||  leftCheck == EXIT)) 
                 {
                     playerPosition[1] -= 1;
+                } else if(leftCheck == ENEMY) {
+                    _EnemyCount--;
+                    if(_EnemyCount == 0)
+                    {
+                        _Map[playerPosition[0], playerPosition[1]-1] = KEY;
+                    }
+                    else 
+                    {
+                         _Map[playerPosition[0], playerPosition[1]-1] = FLOOR;
+                    }
+                    
+                } else if (leftCheck == SPIKEPIT)
+                {
+                    //add code
                 }
-                
-                DrawMap(playerPosition);
             }
             if(input == 'd') 
             {
-                _Map[playerPosition[0], playerPosition[1]] = FLOOR;
-                if(playerPosition[1]+1 < _Map.GetLength(1)-1 && _Map[playerPosition[0], playerPosition[1]+1] == FLOOR) 
+                char rightCheck =_Map[playerPosition[0], playerPosition[1]+1];
+                _Map[playerPosition[0], playerPosition[1]] = LastSquare;
+                if(playerPosition[1]+1 < _Map.GetLength(1)-1 && (rightCheck == FLOOR ||  rightCheck == EXIT))
                 {
-                    playerPosition[1] += 1;
-                }
-                
-                DrawMap(playerPosition);
+                    playerPosition[1] += 1;                    
+                } 
+                else if (rightCheck == ENEMY)
+                {   
+                    _EnemyCount--;
+                    if(_EnemyCount == 0)
+                    {
+                        _Map[playerPosition[0], playerPosition[1]+1] = KEY;
+                    }
+                    else 
+                    {
+                         _Map[playerPosition[0], playerPosition[1]+1] = FLOOR;
+                    }
+                    
+                }            
             }
             if(input == 'w') 
             {
-                _Map[playerPosition[0], playerPosition[1]] = FLOOR;
-                if(playerPosition[0]-1 >= 0&& _Map[playerPosition[0]-1, playerPosition[1]] == FLOOR) 
+                char upCheck = _Map[playerPosition[0]-1, playerPosition[1]];
+                _Map[playerPosition[0], playerPosition[1]] = LastSquare;
+                if(playerPosition[0]-1 >= 0 && (upCheck == FLOOR || upCheck == EXIT)) 
                 {
                     playerPosition[0] -= 1;
+                } 
+                else if(upCheck == ENEMY)
+                {
+                    _EnemyCount--;
+                    if(_EnemyCount == 0)
+                    {
+                        _Map[playerPosition[0]-1, playerPosition[1]] = KEY;
+                    }
+                    else 
+                    {
+                         _Map[playerPosition[0]-1, playerPosition[1]] = FLOOR;
+                    }
+                    
                 }
-                
-                DrawMap(playerPosition);
             }
             if(input == 's') 
             {
-                _Map[playerPosition[0], playerPosition[1]] = FLOOR;
-                if(playerPosition[0]+1 < _Map.GetLength(0)&& _Map[playerPosition[0]+1, playerPosition[1]] == FLOOR) 
+                char downCheck = _Map[playerPosition[0]+1, playerPosition[1]];
+                _Map[playerPosition[0], playerPosition[1]] = LastSquare;
+                if(playerPosition[0]+1 < _Map.GetLength(0) && (downCheck == FLOOR || downCheck == EXIT))
                 {
                     playerPosition[0] += 1;
+                } 
+                else if (downCheck == ENEMY)
+                {
+                    _EnemyCount--;
+                    if(_EnemyCount == 0)
+                    {
+                        _Map[playerPosition[0]+1, playerPosition[1]] = KEY;
+                    }
+                    else 
+                    {
+                         _Map[playerPosition[0]+1, playerPosition[1]] = FLOOR;
+                    }
+                   
                 }
-                
-                DrawMap(playerPosition);
             }
+            LastSquare = _Map[playerPosition[0], playerPosition[1]];
+            DrawMap(playerPosition);
         }
 
         public int[] GetPlayerPosition()
@@ -230,11 +286,10 @@ namespace MapNS
         private void Digger(char[,] map, int[] position, int lifeSpan) 
         {
             int [] myPos = position;
-            // //pick a random direction
             Random rand = new Random();
             int dir = rand.Next(1,5);
-            //pick a number of steps to go
             int dist = rand.Next(3,11);
+            
             if(dir == 1)
             {
                 //up
@@ -254,7 +309,6 @@ namespace MapNS
                 else
                 {
                 Digger(map,myPos,lifeSpan);
-                return;
                 }
             } 
             else if(dir == 2) 
@@ -276,7 +330,6 @@ namespace MapNS
                 else
                 {
                 Digger(map,myPos,lifeSpan);
-                return;
                 }
             } 
             else if(dir == 3)
@@ -298,7 +351,6 @@ namespace MapNS
                 else
                 {
                 Digger(map,myPos,lifeSpan);
-                return;
                 }
                 
             } 
@@ -316,12 +368,36 @@ namespace MapNS
                     if (lifeSpan > 0)
                     {
                         Digger(map,myPos,lifeSpan);
-                    }
+                    } 
                 }
                 else
                 {
                 Digger(map,myPos,lifeSpan);
-                return;
+                }
+            }
+            if(lifeSpan <= 10)
+            {
+                map[myPos[0], myPos[1]] = EXIT;
+                lifeSpan = 0;
+            }
+        }
+
+        private void PopulateMap()
+        {
+            Random rand = new Random();
+            int chance;
+            for(int i=0; i<_Map.GetLength(0)-1; i++)
+            {
+                for(int j=0; j<_Map.GetLength(1)-1; j++)
+                {
+                    if(_Map[i,j] == FLOOR) {
+                        chance = rand.Next(1,101);
+                        if(chance == 1) 
+                        {
+                            _Map[i, j] = ENEMY;
+                            _EnemyCount++;
+                        }
+                    }
                 }
             }
         }
