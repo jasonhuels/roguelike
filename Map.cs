@@ -7,22 +7,28 @@ namespace MapNS
     {
         const char FLOOR = (char)9617;
         const char WALL = (char)9608;
+        const char FOG = (char)9619;
+        private bool[,] _Fog;
         private char[,] _Map;
+        private int[] playerPosition = {15,35};
 
         public Map()
         {
             int[] diggerStart = {15, 35};
             char[,] map = new char[30,71];
+            bool[,] fog = new bool[30,71];
             Console.Clear();
             for (int i=0; i<30; i++)
             {
                 for(int j=0;j<70; j++)
                 {
-                    map[i,j] = (char)9608;
+                    map[i,j] = WALL;
+                    fog[i,j] = true;
                 }
-                map[i,70] = '\n'; 
+                map[i,70] = '\n';
             }
             Digger(map, diggerStart, 1500);
+            _Fog = fog;
             _Map = map;
             CleanMap(7);
             CleanMap(8);
@@ -32,17 +38,52 @@ namespace MapNS
         public void DrawMap(int[] playerPosition) 
         {
             Thread.Sleep(5);
-            //Console.Clear();
+            Console.Clear();
             string mapString = "\r";
-            
             _Map[playerPosition[0], playerPosition[1]] = (char)9792;
-            //move to draw function
+            _Fog[playerPosition[0], playerPosition[1]] = false;
+            for(int i=-4; i<=4; i++)
+            {
+                for(int j=-4; j<=4; j++)
+                {
+                    //relative to player position
+                    if (Math.Abs(i) + Math.Abs(j) <= 4)
+                    {
+                        if((playerPosition[0]+ i >= 0 && playerPosition[0]+i < _Map.GetLength(0)) && (playerPosition[1]+j >= 0 && playerPosition[1]+j < _Map.GetLength(1)-1)) {
+                        _Fog[playerPosition[0]+i, playerPosition[1]+j] = false;
+                        }
+                    }
+                    
+                    
+                    
+                  
+
+
+
+
+
+                    // if(playerPosition[0]+i > 0 && playerPosition[0]+i < _Map.GetLength(0)-1)
+                    // {
+                    //     _Fog[playerPosition[0]+i, playerPosition[1]] = false;
+                    // }
+                    
+                    //  if(playerPosition[1]+i > 0 && playerPosition[1]+i < _Map.GetLength(1)-1)
+                    // {
+                    //     _Fog[playerPosition[0], playerPosition[1]+i] = false;
+                    // }
+                }
+            }
             for(int i=0; i<30; i++)
             {
                 for(int j=0; j< 71; j++)
                 {
                     //Console.Write(map[i,j]);
-                    mapString += _Map[i,j];
+                    if(_Fog[i,j])
+                    {
+                        mapString += FOG;
+                    } else{
+                        mapString += _Map[i,j];
+                    }
                 }
             }
             Console.WriteLine(mapString);
@@ -109,6 +150,50 @@ namespace MapNS
             }
             newMap[29, 70] = '\n';
             _Map = newMap;
+        }
+        
+        public void MovePlayer(char input)
+        {
+             if(input == 'a') 
+            {
+                _Map[playerPosition[0], playerPosition[1]] = FLOOR;
+                if(playerPosition[1]-1 >= 0 && _Map[playerPosition[0], playerPosition[1]-1] == FLOOR) 
+                {
+                    playerPosition[1] -= 1;
+                }
+                
+                DrawMap(playerPosition);
+            }
+            if(input == 'd') 
+            {
+                _Map[playerPosition[0], playerPosition[1]] = FLOOR;
+                if(playerPosition[1]+1 < _Map.GetLength(1)-1 && _Map[playerPosition[0], playerPosition[1]+1] == FLOOR) 
+                {
+                    playerPosition[1] += 1;
+                }
+                
+                DrawMap(playerPosition);
+            }
+            if(input == 'w') 
+            {
+                _Map[playerPosition[0], playerPosition[1]] = FLOOR;
+                if(playerPosition[0]-1 >= 0&& _Map[playerPosition[0]-1, playerPosition[1]] == FLOOR) 
+                {
+                    playerPosition[0] -= 1;
+                }
+                
+                DrawMap(playerPosition);
+            }
+            if(input == 's') 
+            {
+                _Map[playerPosition[0], playerPosition[1]] = FLOOR;
+                if(playerPosition[0]+1 < _Map.GetLength(0)&& _Map[playerPosition[0]+1, playerPosition[1]] == FLOOR) 
+                {
+                    playerPosition[0] += 1;
+                }
+                
+                DrawMap(playerPosition);
+            }
         }
 
         private void Digger(char[,] map, int[] position, int lifeSpan) 
