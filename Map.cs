@@ -17,6 +17,7 @@ namespace MapNS
         private char KEY = (char)8613;
         private char LastSquare = FLOOR;
         private int _EnemyCount = 0;
+        private bool _DoorOpen = false;
         public Map()
         {
             int[] diggerStart = {15, 35};
@@ -189,46 +190,67 @@ namespace MapNS
             {
                 char leftCheck = _Map[playerPosition[0], playerPosition[1]-1];
                 _Map[playerPosition[0], playerPosition[1]] = LastSquare;
-                if(playerPosition[1]-1 >= 0 && (leftCheck == FLOOR ||  leftCheck == EXIT)) 
+                if(playerPosition[1]-1 >= 0)
                 {
-                    playerPosition[1] -= 1;
-                } else if(leftCheck == ENEMY) {
-                    _EnemyCount--;
-                    if(_EnemyCount == 0)
+                    if(leftCheck == EXIT && _DoorOpen)
                     {
-                        _Map[playerPosition[0], playerPosition[1]-1] = KEY;
-                    }
-                    else 
+                        //move to next map
+                    } else if (leftCheck == EXIT || leftCheck == FLOOR)
                     {
-                         _Map[playerPosition[0], playerPosition[1]-1] = FLOOR;
+                        playerPosition[1] -= 1;
+                    } else if(leftCheck == ENEMY) 
+                    {
+                        _EnemyCount--;
+                        if(_EnemyCount == 0)
+                        {
+                            _Map[playerPosition[0], playerPosition[1]-1] = KEY;
+                        } else 
+                        {
+                            _Map[playerPosition[0], playerPosition[1]-1] = FLOOR;
+                        } 
+                    } else if (leftCheck == SPIKEPIT)
+                    {
+                        //add code
+                    } else if (leftCheck == KEY)
+                    {
+                        _DoorOpen = true;
+                        _Map[playerPosition[0], playerPosition[1]-1] = FLOOR;
+                        playerPosition[1] -= 1;
                     }
-                    
-                } else if (leftCheck == SPIKEPIT)
-                {
-                    //add code
-                }
+                }  
             }
             if(input == 'd') 
             {
                 char rightCheck =_Map[playerPosition[0], playerPosition[1]+1];
                 _Map[playerPosition[0], playerPosition[1]] = LastSquare;
-                if(playerPosition[1]+1 < _Map.GetLength(1)-1 && (rightCheck == FLOOR ||  rightCheck == EXIT))
+                if(playerPosition[1]+1 < _Map.GetLength(1)-1)
                 {
-                    playerPosition[1] += 1;                    
-                } 
-                else if (rightCheck == ENEMY)
-                {   
-                    _EnemyCount--;
-                    if(_EnemyCount == 0)
+                    if( rightCheck == EXIT && _DoorOpen)
                     {
-                        _Map[playerPosition[0], playerPosition[1]+1] = KEY;
-                    }
-                    else 
+                        //move to next map
+                    } else if (rightCheck == EXIT || rightCheck == FLOOR)
                     {
-                         _Map[playerPosition[0], playerPosition[1]+1] = FLOOR;
+                        playerPosition[1] += 1; 
+                    } else if (rightCheck == ENEMY)
+                    {
+                        _EnemyCount--;
+                        if(_EnemyCount == 0)
+                        {
+                            _Map[playerPosition[0], playerPosition[1]+1] = KEY;
+                        } else 
+                        {
+                            _Map[playerPosition[0], playerPosition[1]+1] = FLOOR;
+                        }
+                    } else if (rightCheck == SPIKEPIT)
+                    {
+                        //add code
+                    } else if (rightCheck == KEY)
+                    {
+                        _DoorOpen = true;
+                        _Map[playerPosition[0], playerPosition[1]+1] = FLOOR;
+                        playerPosition[1] += 1;
                     }
-                    
-                }            
+                }     
             }
             if(input == 'w') 
             {
