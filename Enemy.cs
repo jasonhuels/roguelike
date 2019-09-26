@@ -7,7 +7,7 @@ namespace EnemyNS
         private int _Health;
         private bool _Active = false;
         private int[] _Position = {0, 0};
-        public Enemy(int health, int[] position) 
+        public Enemy(int id, int health, int[] position) 
         {
             _Health = health;
         }

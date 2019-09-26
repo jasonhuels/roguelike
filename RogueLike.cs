@@ -21,8 +21,8 @@ class Program
         cki = Console.ReadKey(true);
         if(!Console.KeyAvailable)
         {
-            map.MovePlayer(cki.KeyChar);
-            player.SetPosition(map.GetPlayerPosition());
+            //map.MovePlayer(cki.KeyChar);
+            player.SetPosition(map.CheckMove(cki.KeyChar, player.GetPosition()));
             player.DrawHealth();
         }
         

@@ -1,10 +1,14 @@
 using System;
 using System.Threading;
+using PlayerNS;
+using EnemyNS;
 
 namespace MapNS
 {
     public class Map
     {
+        const int HEIGHT = 30;
+        const int WIDTH = 70;
         const char FLOOR = (char)9617;
         const char WALL = (char)9608;
         const char FOG = (char)9619;
@@ -18,6 +22,7 @@ namespace MapNS
         private char LastSquare = FLOOR;
         private int _EnemyCount = 0;
         private bool _DoorOpen = false;
+        private Enemy[] enemies;
         public Map()
         {
             int[] diggerStart = {15, 35};
@@ -184,121 +189,129 @@ namespace MapNS
             _Map = newMap;
         }
         
-        public void MovePlayer(char input)
-        {
-             if(input == 'a') 
+        public int[] CheckMove(char input, int[] startingPosition)
+        {   
+            int moveX = 0;
+            int moveY = 0;
+            int[] outputPosition = startingPosition;
+            char myChar = _Map[startingPosition[0], startingPosition[1]];
+            switch(input)
             {
-                char leftCheck = _Map[playerPosition[0], playerPosition[1]-1];
-                _Map[playerPosition[0], playerPosition[1]] = LastSquare;
-                if(playerPosition[1]-1 >= 0)
-                {
-                    if(leftCheck == EXIT && _DoorOpen)
-                    {
-                        //move to next map
-                    } else if (leftCheck == EXIT || leftCheck == FLOOR)
-                    {
-                        playerPosition[1] -= 1;
-                    } else if(leftCheck == ENEMY) 
-                    {
-                        _EnemyCount--;
-                        if(_EnemyCount == 0)
-                        {
-                            _Map[playerPosition[0], playerPosition[1]-1] = KEY;
-                        } else 
-                        {
-                            _Map[playerPosition[0], playerPosition[1]-1] = FLOOR;
-                        } 
-                    } else if (leftCheck == SPIKEPIT)
-                    {
-                        //add code
-                    } else if (leftCheck == KEY)
-                    {
-                        _DoorOpen = true;
-                        _Map[playerPosition[0], playerPosition[1]-1] = FLOOR;
-                        playerPosition[1] -= 1;
-                    }
-                }  
+                case 'w':
+                    moveX = -1;
+                    break;
+                case 'a':
+                    moveY = -1;
+                    break;
+              
+                case 's':
+                    moveX = 1;
+                    break;
+                case 'd':
+                    moveY = 1;
+                    break;
             }
-            if(input == 'd') 
+            int [] nextPos = {startingPosition[0] + moveX, startingPosition[1] + moveY};
+            char nextChar = _Map[nextPos[0],nextPos[1]];
+             if(nextPos[0] >= 1 && nextPos[0] < HEIGHT - 1 && nextPos[1] >= 1 && nextPos[1] < WIDTH -1)
             {
-                char rightCheck =_Map[playerPosition[0], playerPosition[1]+1];
-                _Map[playerPosition[0], playerPosition[1]] = LastSquare;
-                if(playerPosition[1]+1 < _Map.GetLength(1)-1)
+                if( nextChar == EXIT && _DoorOpen)
                 {
-                    if( rightCheck == EXIT && _DoorOpen)
-                    {
-                        //move to next map
-                    } else if (rightCheck == EXIT || rightCheck == FLOOR)
-                    {
-                        playerPosition[1] += 1; 
-                    } else if (rightCheck == ENEMY)
-                    {
-                        _EnemyCount--;
-                        if(_EnemyCount == 0)
-                        {
-                            _Map[playerPosition[0], playerPosition[1]+1] = KEY;
-                        } else 
-                        {
-                            _Map[playerPosition[0], playerPosition[1]+1] = FLOOR;
-                        }
-                    } else if (rightCheck == SPIKEPIT)
-                    {
-                        //add code
-                    } else if (rightCheck == KEY)
-                    {
-                        _DoorOpen = true;
-                        _Map[playerPosition[0], playerPosition[1]+1] = FLOOR;
-                        playerPosition[1] += 1;
-                    }
-                }     
-            }
-            if(input == 'w') 
-            {
-                char upCheck = _Map[playerPosition[0]-1, playerPosition[1]];
-                _Map[playerPosition[0], playerPosition[1]] = LastSquare;
-                if(playerPosition[0]-1 >= 0 && (upCheck == FLOOR || upCheck == EXIT)) 
+                    //go to next level
+                } else if (nextChar == EXIT || nextChar == FLOOR )
                 {
-                    playerPosition[0] -= 1;
-                } 
-                else if(upCheck == ENEMY)
+                    LastSquare = nextChar;
+                    _Map[startingPosition[0],startingPosition[1]] = FLOOR; //makes door to floor
+                    outputPosition = nextPos;
+                    playerPosition = nextPos;
+                    _Map[startingPosition[0],startingPosition[1]] = LastSquare;
+                } else if (nextChar == ENEMY)
                 {
                     _EnemyCount--;
-                    if(_EnemyCount == 0)
+                    if (_EnemyCount == 0)
                     {
-                        _Map[playerPosition[0]-1, playerPosition[1]] = KEY;
-                    }
-                    else 
+                        _Map[nextPos[0],nextPos[1]] = KEY;
+                    } else
                     {
-                         _Map[playerPosition[0]-1, playerPosition[1]] = FLOOR;
+                        nextChar = FLOOR;
+                        _Map[startingPosition[0],startingPosition[1]] = FLOOR;
+                        outputPosition = nextPos;
+                        playerPosition = nextPos;
                     }
-                    
-                }
-            }
-            if(input == 's') 
-            {
-                char downCheck = _Map[playerPosition[0]+1, playerPosition[1]];
-                _Map[playerPosition[0], playerPosition[1]] = LastSquare;
-                if(playerPosition[0]+1 < _Map.GetLength(0) && (downCheck == FLOOR || downCheck == EXIT))
+                } else if ( nextChar == SPIKEPIT)
                 {
-                    playerPosition[0] += 1;
-                } 
-                else if (downCheck == ENEMY)
+                    //player.ReduceHealth();
+
+                } else if( nextChar == KEY)
                 {
-                    _EnemyCount--;
-                    if(_EnemyCount == 0)
-                    {
-                        _Map[playerPosition[0]+1, playerPosition[1]] = KEY;
-                    }
-                    else 
-                    {
-                         _Map[playerPosition[0]+1, playerPosition[1]] = FLOOR;
-                    }
-                   
-                }
+                    _DoorOpen = true;
+                    _Map[startingPosition[0],startingPosition[1]] = FLOOR;
+                    outputPosition = nextPos;
+                    playerPosition = nextPos;
+                }                
             }
-            LastSquare = _Map[playerPosition[0], playerPosition[1]];
             DrawMap(playerPosition);
+            return outputPosition;
         }
+        // public void MovePlayer(char input)
+        // {
+        //     int moveX = 0;
+        //     int moveY = 0;
+        //     switch(input)
+        //     {
+        //         case 'w':
+        //             moveX = -1;
+        //             break;
+        //         case 'a':
+        //             moveY = -1;
+        //             break;
+              
+        //         case 's':
+        //             moveX = 1;
+        //             break;
+        //         case 'd':
+        //             moveY = 1;
+        //             break;
+        //     }
+        //     int [] startingPos = {playerPosition[0], playerPosition[1]};
+        //     int [] nextPos = {playerPosition[0] + moveX, playerPosition[1] + moveY};
+        //     char nextChar = _Map[nextPos[0],nextPos[1]];
+        //     if(nextPos[0] >= 1 && nextPos[0] < HEIGHT - 1 && nextPos[1] >= 1 && nextPos[1] < WIDTH -1)
+        //     {
+        //         if( nextChar == EXIT && _DoorOpen)
+        //         {
+                    
+        //         } else if (nextChar == EXIT || nextChar == FLOOR )
+        //         {
+        //             LastSquare = nextChar;
+        //             _Map[startingPos[0],startingPos[1]] = FLOOR; //makes door to floor
+        //             playerPosition = nextPos;
+        //             _Map[startingPos[0],startingPos[1]] = LastSquare;
+        //         } else if (nextChar == ENEMY)
+        //         {
+        //             _EnemyCount--;
+        //             if (_EnemyCount == 0)
+        //             {
+        //                 _Map[nextPos[0],nextPos[1]] = KEY;
+        //             } else
+        //             {
+        //                 nextChar = FLOOR;
+        //                 _Map[startingPos[0],startingPos[1]] = FLOOR;
+        //                 playerPosition = nextPos;
+        //             }
+        //         } else if ( nextChar == SPIKEPIT)
+        //         {
+        //             //player.ReduceHealth();
+
+        //         } else if( nextChar == KEY)
+        //         {
+        //             _DoorOpen = true;
+        //             _Map[startingPos[0],startingPos[1]] = FLOOR;
+        //             playerPosition = nextPos;
+        //         }                
+        //     }
+        //     DrawMap(playerPosition);
+        // }
 
         public int[] GetPlayerPosition()
         {
@@ -416,6 +429,8 @@ namespace MapNS
                         chance = rand.Next(1,101);
                         if(chance == 1) 
                         {
+                            int[] pos = {i, j};
+                            Enemy enemy = new Enemy(_EnemyCount, 5, pos);
                             _Map[i, j] = ENEMY;
                             _EnemyCount++;
                         }

@@ -5,16 +5,16 @@ namespace PlayerNS
     public class Player
     {
         private int[] _Position = {15, 35};
-        private int _Health;
+        public int Health { get; set; }
 
         public Player(int health)
         {
-            _Health = health;
+            Health = health;
         }
 
         public void DrawHealth()
         {
-            Console.WriteLine((char)9786 + " Health: " + _Health.ToString());
+            Console.WriteLine((char)9786 + " Health: " + Health.ToString() + " Position: " + _Position[0] + "," + _Position[1]);
         }
 
         public int[] GetPosition()
@@ -26,5 +26,6 @@ namespace PlayerNS
         {
             _Position = position;
         }
+
     }
 }
